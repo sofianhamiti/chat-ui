@@ -2,7 +2,6 @@ const query = (obj) =>
   Object.keys(obj)
     .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(obj[k]))
     .join("&");
-const colorThemes = document.querySelectorAll('[name="theme"]');
 const markdown = window.markdownit();
 const message_box = document.getElementById(`messages`);
 const message_input = document.getElementById(`message-input`);
@@ -18,9 +17,6 @@ const format = (text) => {
   return text.replace(/(?:\r\n|\r|\n)/g, "<br>");
 };
 
-message_input.addEventListener("blur", () => {
-  window.scrollTo(0, 0);
-});
 
 message_input.addEventListener("focus", () => {
   document.documentElement.scrollTop = document.documentElement.scrollHeight;
@@ -40,7 +36,7 @@ const handle_ask = async () => {
 
   if (message.length > 0) {
     message_input.value = ``;
-    await ask_gpt(message);
+    await ask_model(message);
   }
 };
 
@@ -53,7 +49,7 @@ const remove_cancel_button = async () => {
   }, 300);
 };
 
-const ask_gpt = async (message) => {
+const ask_model = async (message) => {
   try {
     message_input.value = ``;
     message_input.innerHTML = ``;
@@ -63,7 +59,6 @@ const ask_gpt = async (message) => {
     window.scrollTo(0, 0);
     window.controller = new AbortController();
 
-    jailbreak = document.getElementById("jailbreak");
     model = document.getElementById("model");
     prompt_lock = true;
     window.text = ``;
@@ -75,7 +70,6 @@ const ask_gpt = async (message) => {
             <div class="message">
                 <div class="user">
                     ${user_image}
-                    <i class="fa-regular fa-phone-arrow-up-right"></i>
                 </div>
                 <div class="content" id="user_${token}"> 
                     ${format(message)}
@@ -93,7 +87,7 @@ const ask_gpt = async (message) => {
     message_box.innerHTML += `
             <div class="message">
                 <div class="user">
-                    ${gpt_image} <i class="fa-regular fa-phone-arrow-down-left"></i>
+                    ${model_image}
                 </div>
                 <div class="content" id="gpt_${window.token}">
                     <div id="cursor"></div>
@@ -117,7 +111,6 @@ const ask_gpt = async (message) => {
         conversation_id: window.conversation_id,
         action: `_ask`,
         model: model.options[model.selectedIndex].value,
-        jailbreak: jailbreak.options[jailbreak.selectedIndex].value,
         meta: {
           id: window.token,
           content: {
@@ -206,7 +199,7 @@ const ask_gpt = async (message) => {
     if (cursorDiv) cursorDiv.parentNode.removeChild(cursorDiv);
 
     if (e.name != `AbortError`) {
-      let error_message = `oops ! something went wrong, please try again / reload. [stacktrace in console]`;
+      let error_message = `oops ! something went wrong, please try again / reload.`;
 
       document.getElementById(`gpt_${window.token}`).innerHTML = error_message;
       add_message(window.conversation_id, "assistant", error_message);
@@ -251,7 +244,7 @@ const show_option = async (conversation_id) => {
 
   conv.style.display = "none";
   yes.style.display = "block";
-  not.style.display = "block"; 
+  not.style.display = "block";
 }
 
 const hide_option = async (conversation_id) => {
@@ -261,14 +254,14 @@ const hide_option = async (conversation_id) => {
 
   conv.style.display = "block";
   yes.style.display = "none";
-  not.style.display = "none"; 
+  not.style.display = "none";
 }
 
 const delete_conversation = async (conversation_id) => {
   localStorage.removeItem(`conversation:${conversation_id}`);
 
   const conversation = document.getElementById(`convo-${conversation_id}`);
-    conversation.remove();
+  conversation.remove();
 
   if (window.conversation_id == conversation_id) {
     await new_conversation();
@@ -304,19 +297,13 @@ const load_conversation = async (conversation_id) => {
     message_box.innerHTML += `
             <div class="message">
                 <div class="user">
-                    ${item.role == "assistant" ? gpt_image : user_image}
-                    ${
-                      item.role == "assistant"
-                        ? `<i class="fa-regular fa-phone-arrow-down-left"></i>`
-                        : `<i class="fa-regular fa-phone-arrow-up-right"></i>`
-                    }
+                    ${item.role == "assistant" ? model_image : user_image}
                 </div>
                 <div class="content">
-                    ${
-                      item.role == "assistant"
-                        ? markdown.render(item.content)
-                        : item.content
-                    }
+                    ${item.role == "assistant"
+        ? markdown.render(item.content)
+        : item.content
+      }
                 </div>
             </div>
         `;
@@ -440,7 +427,7 @@ const message_id = () => {
 };
 
 window.onload = async () => {
-  load_settings_localstorage();
+  // load_settings_localstorage();
 
   conversations = 0;
   for (let i = 0; i < localStorage.length; i++) {
@@ -461,12 +448,12 @@ window.onload = async () => {
     }
   }
 
-message_input.addEventListener(`keydown`, async (evt) => {
+  message_input.addEventListener(`keydown`, async (evt) => {
     if (prompt_lock) return;
     if (evt.keyCode === 13 && !evt.shiftKey) {
-        evt.preventDefault();
-        console.log('pressed enter');
-        await handle_ask();
+      evt.preventDefault();
+      console.log('pressed enter');
+      await handle_ask();
     } else {
       message_input.style.removeProperty("height");
       message_input.style.height = message_input.scrollHeight + 4 + "px";
@@ -479,7 +466,7 @@ message_input.addEventListener(`keydown`, async (evt) => {
     await handle_ask();
   });
 
-  register_settings_localstorage();
+  // register_settings_localstorage();
 };
 
 document.querySelector(".mobile-sidebar").addEventListener("click", (event) => {
@@ -495,68 +482,3 @@ document.querySelector(".mobile-sidebar").addEventListener("click", (event) => {
 
   window.scrollTo(0, 0);
 });
-
-const register_settings_localstorage = async () => {
-  settings_ids = ["switch", "model", "jailbreak"];
-  settings_elements = settings_ids.map((id) => document.getElementById(id));
-  settings_elements.map((element) =>
-    element.addEventListener(`change`, async (event) => {
-      switch (event.target.type) {
-        case "checkbox":
-          localStorage.setItem(event.target.id, event.target.checked);
-          break;
-        case "select-one":
-          localStorage.setItem(event.target.id, event.target.selectedIndex);
-          break;
-        default:
-          console.warn("Unresolved element type");
-      }
-    })
-  );
-};
-
-const load_settings_localstorage = async () => {
-  settings_ids = ["switch", "model", "jailbreak"];
-  settings_elements = settings_ids.map((id) => document.getElementById(id));
-  settings_elements.map((element) => {
-    if (localStorage.getItem(element.id)) {
-      switch (element.type) {
-        case "checkbox":
-          element.checked = localStorage.getItem(element.id) === "true";
-          break;
-        case "select-one":
-          element.selectedIndex = parseInt(localStorage.getItem(element.id));
-          break;
-        default:
-          console.warn("Unresolved element type");
-      }
-    }
-  });
-};
-
-// Theme storage for recurring viewers
-const storeTheme = function (theme) {
-  localStorage.setItem("theme", theme);
-};
-
-// set theme when visitor returns
-const setTheme = function () {
-  const activeTheme = localStorage.getItem("theme");
-  colorThemes.forEach((themeOption) => {
-    if (themeOption.id === activeTheme) {
-      themeOption.checked = true;
-    }
-  });
-  // fallback for no :has() support
-  document.documentElement.className = activeTheme;
-};
-
-colorThemes.forEach((themeOption) => {
-  themeOption.addEventListener("click", () => {
-    storeTheme(themeOption.id);
-    // fallback for no :has() support
-    document.documentElement.className = themeOption.id;
-  });
-});
-
-document.onload = setTheme();
