@@ -59,13 +59,13 @@ const ask_model = async (message) => {
     window.scrollTo(0, 0);
     window.controller = new AbortController();
 
-    model = document.getElementById("model");
     prompt_lock = true;
     window.text = ``;
     window.token = message_id();
 
     stop_generating.classList.remove(`stop_generating-hidden`);
 
+    // DISPLAY MESSAGE AND SCROLL
     message_box.innerHTML += `
             <div class="message">
                 <div class="user">
@@ -77,13 +77,12 @@ const ask_model = async (message) => {
             </div>
         `;
 
-    /* .replace(/(?:\r\n|\r|\n)/g, '<br>') */
-
     message_box.scrollTop = message_box.scrollHeight;
     window.scrollTo(0, 0);
     await new Promise((r) => setTimeout(r, 500));
     window.scrollTo(0, 0);
 
+    // DISPLAY CURSOR
     message_box.innerHTML += `
             <div class="message">
                 <div class="user">
@@ -100,83 +99,31 @@ const ask_model = async (message) => {
     await new Promise((r) => setTimeout(r, 1000));
     window.scrollTo(0, 0);
 
-    const response = await fetch(`/backend-api/v2/conversation`, {
-      method: `POST`,
-      signal: window.controller.signal,
-      headers: {
-        "content-type": `application/json`,
-        accept: `text/event-stream`,
-      },
+    // QUERY MODEL
+    const response = await fetch('/backend-api/v2/conversation', {
+      method: 'POST',
       body: JSON.stringify({
         conversation_id: window.conversation_id,
-        action: `_ask`,
-        model: model.options[model.selectedIndex].value,
-        meta: {
-          id: window.token,
-          content: {
-            conversation: await get_conversation(window.conversation_id),
-            internet_access: document.getElementById("switch").checked,
-            content_type: "text",
-            parts: [
-              {
-                content: message,
-                role: "user",
-              },
-            ],
-          },
-        },
+        id: window.token,
+        content: {
+          conversation: await get_conversation(window.conversation_id),
+          message: message,
+        }
       }),
-    });
-
-    const reader = response.body.getReader();
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      chunk = new TextDecoder().decode(value);
-
-      if (
-        chunk.includes(
-          `<form id="challenge-form" action="/backend-api/v2/conversation?`
-        )
-      ) {
-        chunk = `cloudflare token expired, please refresh the page.`;
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
+    const assistant_output = await response.json();
 
-      text += chunk;
+    try { if (assistant_output.success === false) throw new Error(assistant_output.message) } catch (e) { }
 
-      // const objects         = chunk.match(/({.+?})/g);
-
-      // try { if (JSON.parse(objects[0]).success === false) throw new Error(JSON.parse(objects[0]).error) } catch (e) {}
-
-      // objects.forEach((object) => {
-      //     console.log(object)
-      //     try { text += h2a(JSON.parse(object).content) } catch(t) { console.log(t); throw new Error(t)}
-      // });
-
-      document.getElementById(`gpt_${window.token}`).innerHTML =
-        markdown.render(text);
-      document.querySelectorAll(`code`).forEach((el) => {
-        hljs.highlightElement(el);
-      });
-
-      window.scrollTo(0, 0);
-      message_box.scrollTo({ top: message_box.scrollHeight, behavior: "auto" });
-    }
-
-    // if text contains :
-    if (
-      text.includes(
-        `instead. Maintaining this website and API costs a lot of money`
-      )
-    ) {
-      document.getElementById(`gpt_${window.token}`).innerHTML =
-        "An error occured, please reload / refresh cache and try again.";
-    }
+    // PRINT MESSAGE TO UI
+    displayMessageWordByWord(assistant_output.message, `gpt_${window.token}`, 150)
+    // document.getElementById(`gpt_${window.token}`).innerHTML = assistant_output.message;
 
     add_message(window.conversation_id, "user", message);
-    add_message(window.conversation_id, "assistant", text);
+    add_message(window.conversation_id, "assistant", assistant_output.message);
 
     message_box.scrollTop = message_box.scrollHeight;
     await remove_cancel_button();
@@ -417,6 +364,26 @@ const uuid = () => {
   );
 };
 
+function displayMessageWordByWord(message, elementId, delay) {
+  const words = message.split(" ");
+  const targetElement = document.getElementById(elementId);
+  let currentWordIndex = 0;
+  let sentence = "";
+
+  function displayNextWord() {
+    const currentWord = words[currentWordIndex];
+    sentence += currentWord + " ";
+    targetElement.innerHTML = sentence;
+    currentWordIndex++;
+
+    if (currentWordIndex < words.length) {
+      setTimeout(displayNextWord, delay);
+    }
+  }
+
+  displayNextWord();
+}
+
 const message_id = () => {
   random_bytes = (Math.floor(Math.random() * 1338377565) + 2956589730).toString(
     2
@@ -450,7 +417,7 @@ window.onload = async () => {
 
   message_input.addEventListener(`keydown`, async (evt) => {
     if (prompt_lock) return;
-    if (evt.keyCode === 13 && !evt.shiftKey) {
+    if (evt.key === 'Enter' && !evt.shiftKey) {
       evt.preventDefault();
       console.log('pressed enter');
       await handle_ask();

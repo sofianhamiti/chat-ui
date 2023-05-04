@@ -137,7 +137,7 @@ body {
 }
 
 .conversations .title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
 }
 
@@ -300,7 +300,7 @@ body {
     position: absolute;
     top: -25px;
     left: 0;
-    font-size: 14px;
+    font-size: 15px;
     animation: show_popup 0.4s;
 }
 
@@ -513,7 +513,7 @@ ul {
     top: 0;
     left: 0;
     margin: 10px;
-    font-size: 20px;
+    font-size: 15px;
     cursor: pointer;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);

@@ -1,4 +1,2 @@
-flask
-requests
-langchain
-black
+aws-cdk-lib==2.78.0
+constructs==10.2.15

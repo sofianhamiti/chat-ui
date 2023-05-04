@@ -4,7 +4,7 @@
         "port" : 8880,
         "debug": true
     },
-    "openai_key": "sk-...",
+    "openai_key": "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",
 
     "openai_api_base": "https://api.openai.com"
 }
