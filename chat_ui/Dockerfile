@@ -1,5 +1,6 @@
-# Build stage
 FROM python:3.11.3-slim
+
+WORKDIR /home/app
 
 COPY . .
 

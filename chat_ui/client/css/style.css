@@ -166,7 +166,7 @@ body {
 
 .convo-title {
     color: var(--colour-3);
-    font-size: 14px;
+    font-size: 15px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -215,7 +215,7 @@ body {
 .message .content p,
 .message .content li,
 .message .content code {
-    font-size: 15px;
+    font-size: 20px;
     line-height: 1.3;
 }
 
@@ -240,7 +240,7 @@ body {
 
 .new_convo span {
     color: var(--colour-3);
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .new_convo:hover {
@@ -427,7 +427,7 @@ select {
 
 .bottom_buttons button span {
     color: var(--colour-3);
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .conversations .top {
