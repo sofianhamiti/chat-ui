@@ -1,0 +1,32 @@
+{
+  "version": "31.0.0",
+  "files": {
+    "cbe9f387a86836e6d3accc2a54ae96950bd7653343dd5f94aa28a1b86e607a6b": {
+      "source": {
+        "path": "ChatUIStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "cbe9f387a86836e6d3accc2a54ae96950bd7653343dd5f94aa28a1b86e607a6b.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {
+    "1f94e1078557eb79b0734accf08613180393f34f5e6dcd0095d0e9700f08e607": {
+      "source": {
+        "directory": "asset.1f94e1078557eb79b0734accf08613180393f34f5e6dcd0095d0e9700f08e607"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "repositoryName": "cdk-hnb659fds-container-assets-${AWS::AccountId}-${AWS::Region}",
+          "imageTag": "1f94e1078557eb79b0734accf08613180393f34f5e6dcd0095d0e9700f08e607",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-image-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  }
+}
