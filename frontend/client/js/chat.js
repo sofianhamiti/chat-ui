@@ -100,7 +100,7 @@ const ask_model = async (message) => {
     window.scrollTo(0, 0);
 
     // QUERY MODEL
-    const response = await fetch('/backend-api/v2/conversation', {
+    const response = await fetch('https://aud52on700.execute-api.eu-west-1.amazonaws.com/prod/', {
       method: 'POST',
       body: JSON.stringify({
         conversation_id: window.conversation_id,

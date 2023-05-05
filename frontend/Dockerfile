@@ -4,7 +4,7 @@ WORKDIR /home/app
 
 COPY . .
 
-RUN pip install --no-cache --upgrade -r requirements.txt
+RUN pip install --no-cache -r requirements.txt
 
 EXPOSE 8880
 

@@ -4,7 +4,5 @@
         "port" : 8880,
         "debug": true
     },
-    "openai_key": "sk-",
-
-    "openai_api_base": "https://api.openai.com"
+    "api_url": "https://aud52on700.execute-api.eu-west-1.amazonaws.com/prod/"
 }
